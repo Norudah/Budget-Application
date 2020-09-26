@@ -1,1 +1,3 @@
-Budget-Application
+# Budget Application
+
+Subject proposed by Jonas Schmedtmann.
