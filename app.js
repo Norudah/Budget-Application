@@ -1,5 +1,5 @@
 /**
- * Budget controlle. Heart of the application. Calculation and data storage.
+ * Budget controller. Heart of the application. Calculation and data storage.
  */
 const budgetController = (function () {
 
@@ -70,7 +70,8 @@ const budgetController = (function () {
             let inc = calculateTotal("inc");
             let exp = calculateTotal("exp");
             data.totals.total = inc - exp;
-            data.totals.percentage = Math.round(exp / inc * 100);
+            if (inc > 0)
+                data.totals.percentage = Math.round(exp / inc * 100);
         },
 
         getBudget: function () {
@@ -123,8 +124,11 @@ const userInterfaceController = (function () {
         expenseValue: '.budget__expenses--value',
         percentageValue: '.budget__expenses--percentage',
         containerList: '.container',
-        expensePercentageLabel: '.item__percentage'
+        expensePercentageLabel: '.item__percentage',
+        monthLabel: '.budget__title--month'
     };
+
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     const formatCurrency = function(numberToFormat, type) {
 
@@ -270,6 +274,25 @@ const userInterfaceController = (function () {
                 else
                     node.textContent = "--";
             })
+        },
+
+        setupDate: function() {
+            document.querySelector(DOMClasses.monthLabel).textContent =
+                months[new Date().getMonth()] + ' ' + new Date().getFullYear();
+        },
+
+        UIColorUpdate: function() {
+            const inputFields = document.querySelectorAll(
+                DOMClasses.inputType
+                + ',' + DOMClasses.inputDescription
+                + ',' + DOMClasses.inputValue
+            );
+            const inputBtn = document.querySelector(DOMClasses.inputBtn);
+
+            inputFields.forEach(function(node) {
+                node.classList.toggle('red-focus');
+            });
+            inputBtn.classList.toggle('red');
         }
     }
 })();
@@ -292,6 +315,7 @@ const controller = (function (budgetController, userInterfaceController) {
                 addNewItem();
         });
         document.querySelector(DOMClass.containerList).addEventListener('click', deleteItem);
+        document.querySelector(DOMClass.inputType).addEventListener('change', userInterfaceController.UIColorUpdate);
     }
 
     const updatePercentages = function() {
@@ -331,6 +355,7 @@ const controller = (function (budgetController, userInterfaceController) {
     return {
         initialization: function () {
             setupEventListeners();
+            userInterfaceController.setupDate();
         }
     }
 
@@ -339,4 +364,3 @@ const controller = (function (budgetController, userInterfaceController) {
 
 controller.initialization();
 
-// TODO 1 : Régler le INFINITY % dans l'affichage du budget
