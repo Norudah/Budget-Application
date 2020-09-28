@@ -66,12 +66,6 @@ const budgetController = (function () {
             return result;
         },
 
-        testingDataContent: function () {
-            console.log(data.items.exp);
-            console.log(data.items.inc);
-            console.log(data.totals);
-        },
-
         calculateBudget: function () {
             let inc = calculateTotal("inc");
             let exp = calculateTotal("exp");
@@ -108,6 +102,10 @@ const budgetController = (function () {
 })();
 
 
+
+
+
+
 /**
  * UI Controller. Anything related to inputs and displays
  */
@@ -126,6 +124,44 @@ const userInterfaceController = (function () {
         percentageValue: '.budget__expenses--percentage',
         containerList: '.container',
         expensePercentageLabel: '.item__percentage'
+    };
+
+    const formatCurrency = function(numberToFormat, type) {
+
+        // FIXME : Formatting currency properly is harder than I thought. Using Intl.NumberFormat instead
+
+        let symbol = '';
+
+        const absoluteResult = new Intl.NumberFormat('de-DE', {style: 'currency', currency: 'EUR'}).format(numberToFormat);
+        if (type === 'inc')
+            symbol = '+ ';
+        else if (type === 'exp')
+            symbol = '- ';
+
+        return symbol + absoluteResult;
+
+
+        // console.log(numberToFormat);
+        // let result = "";
+        //
+        // const fixedNumber = numberToFormat.toFixed(2);
+        // const splitedNumber = fixedNumber.split('.');
+        //
+        // const length = splitedNumber[0].length
+        // for (let i = length - 1; i >= 0; i--) {
+        //     result += splitedNumber[0][i];
+        //     if (i % 3 === 0 && i !== 0) {
+        //         result += ',';
+        //     }
+        // }
+        // console.log(result, typeof result);
+        // result = result.split('').reverse().join('');
+        // // result += '.' + splitedNumber[1];
+        // console.log(result, typeof result);
+        //
+        //
+        // console.log(result);
+        // console.log("---");
     }
 
     return {
@@ -161,11 +197,10 @@ const userInterfaceController = (function () {
 
         addItemToUIList: function (newAddedItem) {
 
-            let container, symbol, html;
+            let container, html;
 
             if (newAddedItem.type === "inc") {
                 container = document.querySelector(DOMClasses.incomeContainer);
-                symbol = '+ ';
                 html = '<div class="item clearfix" id="inc-%id%">\n' +
                     '                            <div class="item__description">%description%</div>\n' +
                     '                            <div class="right clearfix">\n' +
@@ -177,7 +212,6 @@ const userInterfaceController = (function () {
                     '                        </div>'
             } else if (newAddedItem.type === "exp") {
                 container = document.querySelector(DOMClasses.expenseContainer);
-                symbol = '- ';
                 html = '<div class="item clearfix" id="exp-%id%">\n' +
                     '                            <div class="item__description">%description%</div>\n' +
                     '                            <div class="right clearfix">\n' +
@@ -194,7 +228,7 @@ const userInterfaceController = (function () {
 
             html = html.replace('%id%', newAddedItem.id);
             html = html.replace('%description%', newAddedItem.description);
-            html = html.replace('%value%', symbol + newAddedItem.value + ' €');
+            html = html.replace('%value%', formatCurrency(newAddedItem.value, newAddedItem.type));
             container.insertAdjacentHTML('beforeend', html);
         },
 
@@ -216,9 +250,9 @@ const userInterfaceController = (function () {
         },
 
         displayBudget: function (object) {
-            document.querySelector(DOMClasses.budgetValue).textContent = object.total + ' €';
-            document.querySelector(DOMClasses.expenseValue).textContent = "- " + object.expenses + ' €';
-            document.querySelector(DOMClasses.incomeValue).textContent = '+ ' + object.incomes + ' €';
+            document.querySelector(DOMClasses.budgetValue).textContent = formatCurrency(object.total);
+            document.querySelector(DOMClasses.expenseValue).textContent = formatCurrency(object.expenses, 'exp');
+            document.querySelector(DOMClasses.incomeValue).textContent = formatCurrency(object.incomes, 'inc');
 
             if (object.percentage > 0)
                 document.querySelector(DOMClasses.percentageValue).textContent = object.percentage + ' %';
@@ -239,6 +273,9 @@ const userInterfaceController = (function () {
         }
     }
 })();
+
+
+
 
 
 /**
@@ -302,4 +339,4 @@ const controller = (function (budgetController, userInterfaceController) {
 
 controller.initialization();
 
-//TODO : Régler le INFINITY % dans l'affichage du budget
+// TODO 1 : Régler le INFINITY % dans l'affichage du budget
